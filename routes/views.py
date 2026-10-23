@@ -94,9 +94,7 @@ class RouteView(APIView):
         try:
             stops = optimize_fuel_stops(stations_on_route, total_miles)
         except ValueError as exc:
-            return Response(
-                {"error": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
+            return Response({"error": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         total_cost = round(sum(s["stop_cost"] for s in stops), 2)
         total_gallons = round(sum(s["gallons_purchased"] for s in stops), 2)
@@ -141,9 +139,7 @@ class MapView(APIView):
         if not start or not finish:
             if as_json:
                 return Response(
-                    {
-                        "error": "Both 'start' and 'finish' query parameters are required."
-                    },
+                    {"error": "Both 'start' and 'finish' query parameters are required."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             return HttpResponse(
@@ -178,9 +174,7 @@ class MapView(APIView):
                     {"error": f"Routing service error: {exc}"},
                     status=status.HTTP_502_BAD_GATEWAY,
                 )
-            return HttpResponse(
-                f"<p>Routing error: {exc}</p>", content_type="text/html"
-            )
+            return HttpResponse(f"<p>Routing error: {exc}</p>", content_type="text/html")
 
         stations_on_route = []
         for deviation in (15.0, 30.0, 50.0):
