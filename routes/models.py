@@ -12,9 +12,9 @@ class FuelStation(models.Model):
     longitude = models.FloatField(null=True, blank=True)
 
     class Meta:
-        unique_together = [['opis_id', 'city', 'state']]
+        unique_together = [["opis_id", "city", "state"]]
         indexes = [
-            models.Index(fields=['latitude', 'longitude']),
+            models.Index(fields=["latitude", "longitude"]),
         ]
 
     def __str__(self):

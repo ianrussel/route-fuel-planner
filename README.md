@@ -20,13 +20,13 @@ python manage.py runserver
 ## Environment Variables
 copy `.env.example` to `.env` and edit as needed. The defaults are fine for local development.
 
-### Database  
+### Database
 change `DATABASE_URL` to point to your database. The default is a local SQLite file.
 
-### Geocoding  
+### Geocoding
 geocoding uses the free ArcGIS endpoint, which has a limit of 1000 requests per day. You can set `GEOCODE_URL` to a different geocoding service if you want.
 
-### API Keys  
+### API Keys
 api keys are not required for the free OSRM demo server or the ArcGIS geocoding endpoint. If you want to use a different routing or geocoding service, you can set `ROUTE_URL` and `GEOCODE_URL` to your preferred endpoints.
 
 ## Endpoints

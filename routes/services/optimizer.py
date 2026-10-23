@@ -110,14 +110,19 @@ def find_stations_near_route(
     return sorted(result, key=lambda s: s["route_dist"])
 
 
-def _compute_fill(station, all_stations, pos, fuel, total_distance_miles, tank_range_miles):
+def _compute_fill(
+    station, all_stations, pos, fuel, total_distance_miles, tank_range_miles
+):
     """Compute how many miles of fuel to buy at this station."""
     dist_to_station = station["route_dist"] - pos
     remaining = fuel - dist_to_station
 
     ahead = [
-        s for s in all_stations
-        if station["route_dist"] < s["route_dist"] <= station["route_dist"] + tank_range_miles
+        s
+        for s in all_stations
+        if station["route_dist"]
+        < s["route_dist"]
+        <= station["route_dist"] + tank_range_miles
     ]
 
     if ahead:
@@ -157,8 +162,7 @@ def optimize_fuel_stops(
 
     while pos + fuel < total_distance_miles:
         reachable = [
-            s for s in stations_on_route
-            if pos < s["route_dist"] <= pos + fuel
+            s for s in stations_on_route if pos < s["route_dist"] <= pos + fuel
         ]
 
         if not reachable:
@@ -176,13 +180,12 @@ def optimize_fuel_stops(
         # Skip tiny fills if we can still reach another station (or destination) without buying here.
         if gallons < MIN_FILL_GALLONS:
             fuel_after_pass = remaining_at_best
-            can_continue = (
-                best["route_dist"] + fuel_after_pass >= total_distance_miles
-                or any(
-                    s["route_dist"] <= best["route_dist"] + fuel_after_pass
-                    for s in stations_on_route
-                    if s["route_dist"] > best["route_dist"]
-                )
+            can_continue = best[
+                "route_dist"
+            ] + fuel_after_pass >= total_distance_miles or any(
+                s["route_dist"] <= best["route_dist"] + fuel_after_pass
+                for s in stations_on_route
+                if s["route_dist"] > best["route_dist"]
             )
             if can_continue:
                 pos = best["route_dist"]

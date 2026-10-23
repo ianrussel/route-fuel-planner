@@ -61,7 +61,9 @@ class Command(BaseCommand):
                 if (city, state) not in geocode_cache and state in US_STATES
             ]
             if missing:
-                self.stdout.write(f"  Geocoding {len(missing)} new city/state pairs ...")
+                self.stdout.write(
+                    f"  Geocoding {len(missing)} new city/state pairs ..."
+                )
                 new_coords = batch_geocode_cities(
                     missing,
                     max_workers=workers,
@@ -69,7 +71,9 @@ class Command(BaseCommand):
                 )
                 geocode_cache.update({k: v for k, v in new_coords.items() if v})
                 geocoded_count = sum(1 for v in new_coords.values() if v)
-                self.stdout.write(f"  Geocoded {geocoded_count}/{len(missing)} successfully.")
+                self.stdout.write(
+                    f"  Geocoded {geocoded_count}/{len(missing)} successfully."
+                )
             else:
                 self.stdout.write("  No new cities to geocode.")
 

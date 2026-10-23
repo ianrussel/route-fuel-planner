@@ -1,8 +1,9 @@
 import logging
-from math import radians, sin, cos, sqrt, asin
+from math import asin, cos, radians, sin, sqrt
+
+from django.conf import settings
 
 import requests
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 

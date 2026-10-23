@@ -3,6 +3,7 @@ import logging
 from functools import lru_cache
 
 from django.http import HttpResponse
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -59,8 +60,10 @@ class RouteView(APIView):
 
         try:
             route = _cached_route(
-                start_coords[0], start_coords[1],
-                finish_coords[0], finish_coords[1],
+                start_coords[0],
+                start_coords[1],
+                finish_coords[0],
+                finish_coords[1],
             )
         except Exception as exc:
             logger.error("Routing error: %s", exc)
@@ -91,7 +94,9 @@ class RouteView(APIView):
         try:
             stops = optimize_fuel_stops(stations_on_route, total_miles)
         except ValueError as exc:
-            return Response({"error": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response(
+                {"error": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
 
         total_cost = round(sum(s["stop_cost"] for s in stops), 2)
         total_gallons = round(sum(s["gallons_purchased"] for s in stops), 2)
@@ -136,7 +141,9 @@ class MapView(APIView):
         if not start or not finish:
             if as_json:
                 return Response(
-                    {"error": "Both 'start' and 'finish' query parameters are required."},
+                    {
+                        "error": "Both 'start' and 'finish' query parameters are required."
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             return HttpResponse(
@@ -153,17 +160,27 @@ class MapView(APIView):
                     {"error": "Could not geocode one or both locations."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            return HttpResponse("<p>Could not geocode one or both locations.</p>", content_type="text/html")
+            return HttpResponse(
+                "<p>Could not geocode one or both locations.</p>",
+                content_type="text/html",
+            )
 
         try:
             route = _cached_route(
-                start_coords[0], start_coords[1],
-                finish_coords[0], finish_coords[1],
+                start_coords[0],
+                start_coords[1],
+                finish_coords[0],
+                finish_coords[1],
             )
         except Exception as exc:
             if as_json:
-                return Response({"error": f"Routing service error: {exc}"}, status=status.HTTP_502_BAD_GATEWAY)
-            return HttpResponse(f"<p>Routing error: {exc}</p>", content_type="text/html")
+                return Response(
+                    {"error": f"Routing service error: {exc}"},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
+            return HttpResponse(
+                f"<p>Routing error: {exc}</p>", content_type="text/html"
+            )
 
         stations_on_route = []
         for deviation in (15.0, 30.0, 50.0):
@@ -181,7 +198,9 @@ class MapView(APIView):
                 stops = optimize_fuel_stops(stations_on_route, route["distance_miles"])
             except ValueError as exc:
                 if as_json:
-                    return Response({"error": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                    return Response(
+                        {"error": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                    )
 
         if as_json:
             total_cost = round(sum(s["stop_cost"] for s in stops), 2)
