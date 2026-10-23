@@ -2,12 +2,14 @@ import logging
 
 from django.conf import settings
 
+from ..db_connection import db
 from .router import haversine
 
 logger = logging.getLogger(__name__)
 
 MPG = getattr(settings, "VEHICLE_MPG", 10.0)
 TANK_RANGE_MILES = getattr(settings, "VEHICLE_TANK_RANGE_MILES", 500.0)
+MIN_FILL_GALLONS = getattr(settings, "VEHICLE_MIN_FILL_GALLONS", 10.0)
 
 
 def _point_to_segment(pt_lat, pt_lon, a_lat, a_lon, b_lat, b_lon):
@@ -54,7 +56,6 @@ def _station_route_info(station_lat, station_lon, route_coords, cumulative_dists
 
 
 def find_stations_near_route(
-    stations_qs,
     route_coords: list,
     cumulative_dists: list,
     max_deviation_miles: float = 15.0,
@@ -70,12 +71,11 @@ def find_stations_near_route(
     lons = [c[0] for c in route_coords]
     pad = max_deviation_miles / 55.0  # ~1 degree lat = 69 miles
 
-    candidates = stations_qs.filter(
-        latitude__isnull=False,
-        latitude__gte=min(lats) - pad,
-        latitude__lte=max(lats) + pad,
-        longitude__gte=min(lons) - pad,
-        longitude__lte=max(lons) + pad,
+    candidates = db.get_stations_in_bbox(
+        lat_min=min(lats) - pad,
+        lat_max=max(lats) + pad,
+        lon_min=min(lons) - pad,
+        lon_max=max(lons) + pad,
     )
 
     # Use a coarser sample of the route for speed; each segment is <=5 miles
@@ -151,7 +151,6 @@ def optimize_fuel_stops(
       additional stations remain reachable without buying there.
     - Returns a list of stop dicts sorted by miles_from_start.
     """
-    MIN_FILL_GALLONS = 10.0
     stops = []
     pos = 0.0
     fuel = tank_range_miles

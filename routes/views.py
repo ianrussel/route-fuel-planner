@@ -7,7 +7,6 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import FuelStation
 from .services.geocoder import geocode_location
 from .services.optimizer import find_stations_near_route, optimize_fuel_stops
 from .services.router import get_route
@@ -72,11 +71,10 @@ class RouteView(APIView):
 
         total_miles = route["distance_miles"]
 
-        stations_qs = FuelStation.objects.filter(latitude__isnull=False)
         # Expand search radius progressively if needed
+        stations_on_route = []
         for deviation in (15.0, 30.0, 50.0):
             stations_on_route = find_stations_near_route(
-                stations_qs,
                 route["coords"],
                 route["cumulative_distances"],
                 max_deviation_miles=deviation,
@@ -167,11 +165,9 @@ class MapView(APIView):
                 return Response({"error": f"Routing service error: {exc}"}, status=status.HTTP_502_BAD_GATEWAY)
             return HttpResponse(f"<p>Routing error: {exc}</p>", content_type="text/html")
 
-        stations_qs = FuelStation.objects.filter(latitude__isnull=False)
         stations_on_route = []
         for deviation in (15.0, 30.0, 50.0):
             stations_on_route = find_stations_near_route(
-                stations_qs,
                 route["coords"],
                 route["cumulative_distances"],
                 max_deviation_miles=deviation,
