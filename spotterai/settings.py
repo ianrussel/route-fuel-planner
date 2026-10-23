@@ -61,6 +61,9 @@ NOMINATIM_URL = os.environ.get(
     "https://nominatim.openstreetmap.org/search",
 )
 
+# API authentication
+API_KEY = os.environ.get("API_KEY", "")
+
 # Vehicle specs
 VEHICLE_MPG = float(os.environ.get("VEHICLE_MPG", "10.0"))
 VEHICLE_TANK_RANGE_MILES = float(os.environ.get("VEHICLE_TANK_RANGE_MILES", "500.0"))
@@ -69,6 +72,12 @@ VEHICLE_MIN_FILL_GALLONS = float(os.environ.get("VEHICLE_MIN_FILL_GALLONS", "10.
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "routes.authentication.ApiKeyAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
 }
 

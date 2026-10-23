@@ -26,8 +26,10 @@ change `DATABASE_URL` to point to your database. The default is a local SQLite f
 ### Geocoding
 geocoding uses the free ArcGIS endpoint, which has a limit of 1000 requests per day. You can set `GEOCODE_URL` to a different geocoding service if you want.
 
-### API Keys
-api keys are not required for the free OSRM demo server or the ArcGIS geocoding endpoint. If you want to use a different routing or geocoding service, you can set `ROUTE_URL` and `GEOCODE_URL` to your preferred endpoints.
+### API Authentication
+Set `API_KEY` in `.env` to protect the API. Every request must then include the header `X-Api-Key: <key>`.
+
+Leave `API_KEY` blank (the default) to disable auth during local development.
 
 ## Endpoints
 
@@ -45,7 +47,12 @@ Returns the optimal fuel stop plan as JSON.
 **Example**
 
 ```bash
+# Without auth (API_KEY not set)
 curl "http://localhost:8000/api/route/?start=New+York,+NY&finish=Los+Angeles,+CA"
+
+# With auth (API_KEY=mysecret in .env)
+curl -H "X-Api-Key: mysecret" \
+  "http://localhost:8000/api/route/?start=New+York,+NY&finish=Los+Angeles,+CA"
 ```
 
 **Response**
@@ -84,7 +91,7 @@ curl "http://localhost:8000/api/route/?start=New+York,+NY&finish=Los+Angeles,+CA
 }
 ```
 
-More curl examples:
+More curl examples (add `-H "X-Api-Key: <key>"` to each when `API_KEY` is set):
 
 ```bash
 # Chicago to Houston
@@ -104,14 +111,19 @@ curl "http://localhost:8000/api/route/?start=350+5th+Ave+New+York+NY&finish=1600
 Returns an interactive Leaflet map (HTML) showing the route polyline and fuel stop markers.
 
 ```bash
-# Open in browser
+# Open in browser (no auth)
 curl "http://localhost:8000/api/route/map/?start=New+York,+NY&finish=Los+Angeles,+CA"
+
+# With auth
+curl -H "X-Api-Key: <key>" \
+  "http://localhost:8000/api/route/map/?start=New+York,+NY&finish=Los+Angeles,+CA"
 ```
 
-Add `?format=json` to get the same JSON payload as `/api/route/` from this endpoint:
+Add `&format=json` to get the same JSON payload as `/api/route/` from this endpoint:
 
 ```bash
-curl "http://localhost:8000/api/route/map/?start=New+York,+NY&finish=Los+Angeles,+CA&format=json"
+curl -H "X-Api-Key: <key>" \
+  "http://localhost:8000/api/route/map/?start=New+York,+NY&finish=Los+Angeles,+CA&format=json"
 ```
 
 ## Notes
