@@ -111,3 +111,4 @@ curl "http://localhost:8000/api/route/map/?start=New+York,+NY&finish=Los+Angeles
 - The optimizer uses a greedy look-ahead strategy: it fills up at cheap stations and
   defers buying at expensive ones, stopping only when the fill justifies the detour.
 # route-fuel-planner
+# route-fuel-planner
