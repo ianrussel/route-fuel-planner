@@ -1,11 +1,9 @@
-import json
 import logging
-import urllib.parse
-import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 
 import requests as _requests
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +15,12 @@ US_STATES = {
     'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC',
 }
 
-_ARCGIS_URL = (
-    "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
-    "/findAddressCandidates"
-)
-_NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-
 
 def _arcgis_geocode(query: str) -> tuple | None:
     """Single geocode call via ArcGIS free endpoint. Returns (lat, lon) or None."""
     try:
         resp = _requests.get(
-            _ARCGIS_URL,
+            settings.ARCGIS_GEOCODE_URL,
             params={"singleLine": query, "f": "json", "maxLocations": "1", "outFields": "none"},
             timeout=10,
         )
@@ -46,7 +38,7 @@ def _nominatim_geocode(query: str) -> tuple | None:
     """Geocode via Nominatim (used for user-facing location queries only). Returns (lat, lon) or None."""
     try:
         resp = _requests.get(
-            _NOMINATIM_URL,
+            settings.NOMINATIM_URL,
             params={"q": query, "format": "json", "countrycodes": "us", "limit": "1"},
             headers={"User-Agent": "FuelRoutePlanner/1.0 (educational project)"},
             timeout=10,

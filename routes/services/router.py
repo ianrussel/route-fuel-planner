@@ -2,10 +2,10 @@ import logging
 from math import radians, sin, cos, sqrt, asin
 
 import requests
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-OSRM_BASE = "http://router.project-osrm.org/route/v1/driving"
 EARTH_RADIUS_MILES = 3958.8
 
 
@@ -35,7 +35,7 @@ def get_route(
       distance_miles
       duration_seconds
     """
-    url = f"{OSRM_BASE}/{start_lon},{start_lat};{end_lon},{end_lat}"
+    url = f"{settings.OSRM_BASE_URL}/{start_lon},{start_lat};{end_lon},{end_lat}"
     params = {
         "overview": "full",
         "geometries": "geojson",
@@ -43,7 +43,7 @@ def get_route(
         "annotations": "false",
     }
 
-    resp = requests.get(url, params=params, timeout=timeout)
+    resp = requests.get(url, params=params, timeout=timeout or settings.ROUTING_TIMEOUT)
     resp.raise_for_status()
     data = resp.json()
 

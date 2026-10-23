@@ -1,10 +1,13 @@
 import logging
+
+from django.conf import settings
+
 from .router import haversine
 
 logger = logging.getLogger(__name__)
 
-MPG = 10.0
-TANK_RANGE_MILES = 500.0
+MPG = getattr(settings, "VEHICLE_MPG", 10.0)
+TANK_RANGE_MILES = getattr(settings, "VEHICLE_TANK_RANGE_MILES", 500.0)
 
 
 def _point_to_segment(pt_lat, pt_lon, a_lat, a_lon, b_lat, b_lon):
