@@ -2,7 +2,10 @@
 
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
+
+# Run all view tests with auth disabled so they focus on view logic, not auth.
+_no_auth = override_settings(API_KEY="")
 
 MOCK_ROUTE = {
     "geometry": {"type": "LineString", "coordinates": [[-74.0, 40.0], [-75.0, 40.5]]},
@@ -28,6 +31,7 @@ MOCK_STOPS = [
 ]
 
 
+@_no_auth
 class TestRouteViewMissingParams(TestCase):
     def test_missing_both_params(self):
         resp = self.client.get("/api/route/")
@@ -43,6 +47,7 @@ class TestRouteViewMissingParams(TestCase):
         assert resp.status_code == 400
 
 
+@_no_auth
 class TestRouteViewBadGeocode(TestCase):
     @patch("routes.views._cached_geocode", return_value=None)
     def test_bad_start_returns_400(self, _):
@@ -51,6 +56,7 @@ class TestRouteViewBadGeocode(TestCase):
         assert "geocode" in resp.json()["error"].lower()
 
 
+@_no_auth
 class TestRouteViewSuccess(TestCase):
     @patch("routes.views.optimize_fuel_stops", return_value=MOCK_STOPS)
     @patch("routes.views.find_stations_near_route", return_value=[{"route_dist": 30}])
@@ -103,6 +109,7 @@ class TestRouteViewSuccess(TestCase):
         assert resp.status_code == 502
 
 
+@_no_auth
 class TestMapViewHtml(TestCase):
     def test_missing_params_returns_html_hint(self):
         resp = self.client.get("/api/route/map/")
@@ -127,6 +134,7 @@ class TestMapViewHtml(TestCase):
         assert b"leaflet" in resp.content.lower()
 
 
+@_no_auth
 class TestMapViewFormatJson(TestCase):
     def test_missing_params_returns_json_error(self):
         resp = self.client.get("/api/route/map/?format=json")

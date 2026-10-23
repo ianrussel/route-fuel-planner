@@ -4,6 +4,7 @@ from functools import lru_cache
 
 from django.http import HttpResponse
 
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiTypes, extend_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,15 +26,42 @@ def _cached_route(start_lat, start_lon, end_lat, end_lon):
     return get_route(start_lat, start_lon, end_lat, end_lon)
 
 
+_ROUTE_PARAMS = [
+    OpenApiParameter(
+        "start",
+        OpenApiTypes.STR,
+        OpenApiParameter.QUERY,
+        required=True,
+        description="Starting location (city + state or full address, e.g. 'New York, NY').",
+    ),
+    OpenApiParameter(
+        "finish",
+        OpenApiTypes.STR,
+        OpenApiParameter.QUERY,
+        required=True,
+        description="Destination location (city + state or full address).",
+    ),
+]
+
+
 class RouteView(APIView):
     """
-    GET /api/route/?start=<location>&finish=<location>
-
     Returns the optimal fuel stop plan for a US driving route.
-    The vehicle is assumed to start with a full 500-mile tank (50 gal at 10 mpg).
-    Total fuel cost reflects only fuel purchased at stops along the route.
+    The vehicle starts with a full 500-mile tank (50 gal at 10 mpg).
+    Total fuel cost covers only fuel purchased at stops along the route.
     """
 
+    @extend_schema(
+        parameters=_ROUTE_PARAMS,
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 502: OpenApiTypes.OBJECT},
+        examples=[
+            OpenApiExample(
+                "New York to Los Angeles",
+                value={"start": "New York, NY", "finish": "Los Angeles, CA"},
+                request_only=True,
+            )
+        ],
+    )
     def get(self, request):
         start = request.query_params.get("start", "").strip()
         finish = request.query_params.get("finish", "").strip()
@@ -125,12 +153,24 @@ class RouteView(APIView):
 
 class MapView(APIView):
     """
-    GET /api/route/map/?start=<location>&finish=<location>
-
-    Returns an interactive HTML map by default.
-    Add ?format=json to get the same JSON payload as /api/route/.
+    Returns an interactive Leaflet map for the route by default.
+    Add `format=json` to get the same JSON payload as `/api/route/`.
     """
 
+    @extend_schema(
+        parameters=_ROUTE_PARAMS
+        + [
+            OpenApiParameter(
+                "format",
+                OpenApiTypes.STR,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Pass `json` to return JSON instead of the HTML map.",
+                enum=["json"],
+            )
+        ],
+        responses={200: OpenApiTypes.OBJECT},
+    )
     def get(self, request):
         start = request.query_params.get("start", "").strip()
         finish = request.query_params.get("finish", "").strip()

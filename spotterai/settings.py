@@ -18,7 +18,21 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "rest_framework",
+    "drf_spectacular",
     "routes",
+]
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+            ],
+        },
+    },
 ]
 
 MIDDLEWARE = [
@@ -79,6 +93,20 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Fuel Route Planner API",
+    "DESCRIPTION": (
+        "Given a start and finish location in the US, returns the optimal fuel stop plan "
+        "for a truck with a 500-mile tank range and 10 mpg fuel economy. "
+        "Fuel prices come from a bundled CSV dataset. Routing uses the free OSRM demo server.\n\n"
+        "**Authentication:** Set `API_KEY` in `.env` and pass `X-Api-Key: <key>` on every request. "
+        "Leave `API_KEY` blank to disable auth (local dev default)."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 LOGGING = {

@@ -31,6 +31,18 @@ Set `API_KEY` in `.env` to protect the API. Every request must then include the 
 
 Leave `API_KEY` blank (the default) to disable auth during local development.
 
+## API Docs
+
+Interactive docs are served automatically once the server is running:
+
+| URL | Description |
+|-----|-------------|
+| `http://localhost:8000/api/docs/` | Swagger UI |
+| `http://localhost:8000/api/redoc/` | ReDoc |
+| `http://localhost:8000/api/schema/` | Raw OpenAPI 3.0 schema (YAML) |
+
+The docs pages are public (no auth header required to view them).
+
 ## Endpoints
 
 ### GET /api/route/

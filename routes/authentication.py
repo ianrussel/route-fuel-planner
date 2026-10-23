@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import BasePermission
@@ -36,3 +37,18 @@ class ApiKeyRequired(BasePermission):
 
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated)
+
+
+class ApiKeyAuthenticationScheme(OpenApiAuthenticationExtension):
+    target_class = "routes.authentication.ApiKeyAuthentication"
+    name = "ApiKeyAuth"
+
+    def get_security_definition(self, auto_schema):
+        return {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-Api-Key",
+        }
+
+    def get_security_requirement(self, auto_schema):
+        return {"ApiKeyAuth": []}

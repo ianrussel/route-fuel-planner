@@ -4,3 +4,4 @@ requests>=2.31
 geopy>=2.4
 python-dotenv>=1.0
 dj-database-url>=2.1
+drf-spectacular>=0.27
